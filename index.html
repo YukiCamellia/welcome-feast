@@ -26,7 +26,6 @@
       overflow: hidden;
       padding: 24px;
     }
-
     /* ========== 第一页：欢迎页 ========== */
     #page-welcome {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
@@ -103,14 +102,13 @@
       0%, 100% { transform: translateX(-50%) translateY(0); }
       50% { transform: translateX(-50%) translateY(10px); }
     }
-
     /* ========== 第二页：时间选择 ========== */
     #page-time {
       background: linear-gradient(160deg, #2b5876 0%, #4e4376 100%);
     }
     .section-header {
       text-align: center;
-      margin-bottom: 32px;
+      margin-bottom: 16px;
       animation: fadeInUp 0.8s ease both;
     }
     .section-header h2 {
@@ -120,6 +118,18 @@
       margin-bottom: 8px;
     }
     .section-header p { opacity: 0.8; font-size: 0.95rem; letter-spacing: 0.05em; }
+
+    /* 关键：时间选项设置最大高度，超出滚动，解决手机显示不全 */
+    .time-options-wrap {
+      max-height: 42vh;
+      overflow-y: auto;
+      width: 100%;
+      max-width:420px;
+      padding-right:4px;
+    }
+    .time-options-wrap::-webkit-scrollbar{width:4px;}
+    .time-options-wrap::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.25);border-radius:2px;}
+
     .time-options {
       display: flex;
       flex-direction: column;
@@ -139,13 +149,7 @@
       cursor: pointer;
       transition: all 0.3s ease;
       backdrop-filter: blur(10px);
-      animation: fadeInUp 0.6s ease both;
     }
-    .time-card:nth-child(1) { animation-delay: 0.1s; }
-    .time-card:nth-child(2) { animation-delay: 0.2s; }
-    .time-card:nth-child(3) { animation-delay: 0.3s; }
-    .time-card:nth-child(4) { animation-delay: 0.4s; }
-    .time-card:nth-child(5) { animation-delay: 0.5s; }
     .time-card:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.35); transform: translateX(4px); }
     .time-card.selected {
       background: rgba(255,255,255,0.2);
@@ -155,21 +159,22 @@
     .time-card .radio {
       width: 24px; height: 24px;
       border: 2px solid rgba(255,255,255,0.5);
-      border-radius: 50%;
+      border-radius: 6px; /* 改成方形多选框样式 */
       flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
       transition: all 0.3s ease;
     }
     .time-card.selected .radio { border-color: #ffd700; }
     .time-card.selected .radio::after {
-      content: ''; width: 12px; height: 12px; background: #ffd700; border-radius: 50%;
+      content: '✓'; color:#ffd700; font-weight:bold; font-size:16px;
     }
     .time-card .info { flex: 1; }
     .time-card .info .day { font-size: 1.1rem; font-weight: 600; }
     .time-card .info .detail { font-size: 0.85rem; opacity: 0.75; margin-top: 2px; }
     .time-card .votes { font-size: 0.8rem; opacity: 0.7; text-align: right; white-space: nowrap; }
+
     .submit-btn {
-      margin-top: 24px;
+      margin-top: 18px;
       padding: 14px 48px;
       border: none;
       border-radius: 30px;
@@ -181,11 +186,11 @@
       cursor: pointer;
       transition: all 0.3s ease;
       box-shadow: 0 4px 20px rgba(255,215,0,0.4);
-      animation: fadeInUp 0.6s ease 0.6s both;
     }
     .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(255,215,0,0.55); }
     .submit-btn:active { transform: translateY(0); }
     .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
     .toast {
       position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-100px);
       background: rgba(255,255,255,0.95); color: #2b5876;
@@ -220,7 +225,6 @@
       outline: none; border-color: #ffd700; background: rgba(255,255,255,0.12);
     }
     .blessing-form textarea { min-height: 80px; resize: vertical; }
-
     /* 祝福统计条 */
     .blessing-stats {
       max-width: 460px; width: 100%;
@@ -234,16 +238,14 @@
     }
     .blessing-stats .count { color: #ffd700; font-weight: 700; font-size: 1rem; }
     .blessing-stats .count span { font-size: 1.4rem; margin-right: 4px; }
-
     /* 瀑布流祝福墙 */
     .blessing-wall {
       max-width: 460px; width: 100%;
       columns: 2; column-gap: 12px;
-      max-height: 360px; overflow-y: auto; padding: 4px 6px 4px 0;
+      max-height: 320px; overflow-y: auto; padding: 4px 6px 4px 0;
     }
     .blessing-wall::-webkit-scrollbar { width: 4px; }
     .blessing-wall::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
-
     /* 彩色祝福卡片 */
     .blessing-card {
       break-inside: avoid;
@@ -271,7 +273,6 @@
     .blessing-card.c4 { background: linear-gradient(135deg, #fdcbf1 0%, #e6dee9 100%); color: #5d3a5d; }
     .blessing-card.c5 { background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%); color: #2c4a5d; }
     .blessing-card.c6 { background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%); color: #2c5d3a; }
-
     .blessing-card .card-header {
       display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
     }
@@ -308,7 +309,6 @@
       text-align: center; opacity: 0.5; font-size: 0.9rem; padding: 30px 20px;
       grid-column: 1 / -1;
     }
-
     /* ========== 通用动画 ========== */
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(30px); }
@@ -327,7 +327,6 @@
     .deco-1 { width: 300px; height: 300px; top: -100px; left: -80px; }
     .deco-2 { width: 200px; height: 200px; bottom: -60px; right: -40px; }
     .deco-3 { width: 150px; height: 150px; top: 20%; right: 10%; background: rgba(255,215,0,0.05); }
-
     /* 页码指示器 */
     .page-dots {
       position: fixed; right: 14px; top: 50%; transform: translateY(-50%);
@@ -338,24 +337,20 @@
       background: rgba(255,255,255,0.35); cursor: pointer; transition: all 0.3s ease;
     }
     .page-dots .dot.active { background: #ffd700; height: 24px; border-radius: 4px; }
-
     @media (max-width: 400px) {
       .gallery-item { width: 100px; height: 100px; }
     }
   </style>
 </head>
 <body>
-
   <!-- 页码指示器 -->
   <div class="page-dots">
     <div class="dot active" onclick="document.getElementById('page-welcome').scrollIntoView()"></div>
     <div class="dot" onclick="document.getElementById('page-time').scrollIntoView()"></div>
     <div class="dot" onclick="document.getElementById('page-blessing').scrollIntoView()"></div>
   </div>
-
   <!-- 提示弹窗 -->
   <div class="toast" id="toast"></div>
-
   <!-- ============ 第一页：欢迎页 ============ -->
   <section class="page" id="page-welcome">
     <div class="deco-circle deco-1"></div>
@@ -367,12 +362,12 @@
       <div class="welcome-date">期待与你相聚</div>
       <!-- 图片相册：将下方 src 替换为你的图片路径或网络链接即可，也可增删 gallery-item -->
       <div class="gallery" id="gallery">
-        <div class="gallery-item"><img src="" alt="照片1" onerror="this.parentElement.classList.add('placeholder');this.style.display='none';this.parentElement.textContent='🌸';"></div>
-        <div class="gallery-item"><img src="" alt="照片2" onerror="this.parentElement.classList.add('placeholder');this.style.display='none';this.parentElement.textContent='🎉';"></div>
-        <div class="gallery-item"><img src="" alt="照片3" onerror="this.parentElement.classList.add('placeholder');this.style.display='none';this.parentElement.textContent='🎓';"></div>
+        <div class="gallery-item"><img src="./door.jpg" alt="照片1" onerror="this.parentElement.classList.add('placeholder');this.style.display='none';this.parentElement.textContent='🌸';"></div>
+        <div class="gallery-item"><img src="./sakura.jpg" alt="照片2" onerror="this.parentElement.classList.add('placeholder');this.style.display='none';this.parentElement.textContent='🎉';"></div>
+        <div class="gallery-item"><img src="./students.jpg" alt="照片3" onerror="this.parentElement.classList.add('placeholder');this.style.display='none';this.parentElement.textContent='🎓';"></div>
       </div>
       <p style="opacity:0.75; font-size:0.85rem; line-height:1.8;">
-        亲爱的学弟学妹，<br/>欢迎加入上海交大的大家庭！<br/>让我们在聚餐中相识相知，共启新程
+        亲爱的学弟学妹，<br />欢迎加入上海交大的大家庭！<br />让我们在聚餐中相识相知，共启新程
       </p>
     </div>
     <div class="scroll-hint">
@@ -380,21 +375,21 @@
       <div class="arrow">↓</div>
     </div>
   </section>
-
   <!-- ============ 第二页：时间选择 ============ -->
   <section class="page" id="page-time">
     <div class="deco-circle deco-1"></div>
     <div class="deco-circle deco-2"></div>
     <div class="section-header">
       <h2>选择聚餐时间</h2>
-      <p>请选择你方便的时间段，我们将根据多数人意愿确定最终时间</p>
+      <p>可多选，勾选你方便的时间段，我们将根据多数人意愿确定最终时间</p>
     </div>
-    <div class="time-options" id="timeOptions">
-      <!-- 时间选项由 JS 动态生成 -->
+    <div class="time-options-wrap">
+      <div class="time-options" id="timeOptions">
+        <!-- 时间选项由 JS 动态生成 -->
+      </div>
     </div>
     <button class="submit-btn" id="submitTimeBtn" disabled>确认选择</button>
   </section>
-
   <!-- ============ 第三页：祝福墙 ============ -->
   <section class="page" id="page-blessing">
     <div class="deco-circle deco-1"></div>
@@ -416,38 +411,32 @@
       <div class="empty-hint">还没有祝福，快来第一个留言吧～</div>
     </div>
   </section>
-
   <script>
     /* ============================================================
      *  学长配置区 —— 请在此处修改你的自定义内容
      * ============================================================ */
-
-    // ① 欢迎页图片：填入图片路径或网络链接，留空则显示默认图标
-    //    支持本地图片（如 images/1.jpg）或网络图片（https://...）
+    // ① 欢迎页图片：现在图片放在仓库根目录，使用 ./文件名
     const WELCOME_IMAGES = [
       'welcome-feast/door.jpg',
       'welcome-feast/sakura.jpg',
       'welcome-feast/students.jpg',
     ];
-
-    // ② 聚餐时间选项：自由增删，每项含 day（日期）与 detail（时间段+描述）
+    // ② 聚餐时间选项：修复重复条目
     const TIME_OPTIONS = [
-      { day: '9月13日 周日', detail: '18:00 - 20:30  ·  ' },
-      { day: '9月13日 周日', detail: '11:30 - 14:00  ·  ' },
-      { day: '9月20日 周日', detail: '18:00 - 20:30  ·  ' },
-      { day: '9月20日 周日', detail: '18:00 - 20:30  ·  ' },
-      { day: '9月25日 周五（中秋）', detail: '18:00 - 20:30  ·  ' },
-      { day: '9月25日 周五（中秋）', detail: '11:30 - 14:00  ·  ' },
-      { day: '9月26日 周六', detail: '18:00 - 20:30  ·  ' },
-      { day: '9月26日 周六', detail: '11:30 - 14:00  ·  ' },
-      { day: '9月27日 周六', detail: '18:00 - 20:30  ·  ' },
-      { day: '9月27日 周六', detail: '11:30 - 14:00  ·  ' },
+      { day: '9月13日 周日', detail: '18:00 - 20:30' },
+      { day: '9月13日 周日', detail: '11:30 - 14:00' },
+      { day: '9月20日 周日', detail: '18:00 - 20:30' },
+      { day: '9月20日 周日', detail: '11:30 - 14:00' },
+      { day: '9月25日 周五（中秋）', detail: '18:00 - 20:30' },
+      { day: '9月25日 周五（中秋）', detail: '11:30 - 14:00' },
+      { day: '9月26日 周六', detail: '18:00 - 20:30' },
+      { day: '9月26日 周六', detail: '11:30 - 14:00' },
+      { day: '9月27日 周日', detail: '18:00 - 20:30' },
+      { day: '9月27日 周日', detail: '11:30 - 14:00' },
     ];
-
     /* ============================================================
-     *  以下为功能逻辑，一般无需修改
+     *  以下为功能逻辑，多选版本
      * ============================================================ */
-
     // ---- 渲染欢迎页图片 ----
     function renderGallery() {
       const gallery = document.getElementById('gallery');
@@ -458,51 +447,60 @@
       }
     }
 
-    // ---- 渲染时间选项 ----
-    let selectedTime = null;
+    // ========== 多选逻辑：selectedTimes 数组保存选中索引 ==========
+    let selectedTimes = [];
+    // votes：每个人的选择数组 {voterId:[0,2,3]}
     const votes = JSON.parse(localStorage.getItem('dinnerVotes') || '{}');
 
     function renderTimeOptions() {
       const container = document.getElementById('timeOptions');
       container.innerHTML = TIME_OPTIONS.map((opt, i) => {
-        const voteCount = Object.values(votes).filter(v => v === i).length;
+        const voteCount = Object.values(votes).filter(arr => Array.isArray(arr) && arr.includes(i)).length;
+        const isSel = selectedTimes.includes(i);
         return `
-          <div class="time-card" data-index="${i}" onclick="selectTime(${i})">
+          <div class="time-card ${isSel?'selected':''}" data-index="${i}" onclick="toggleTime(${i})">
             <div class="radio"></div>
             <div class="info">
               <div class="day">${opt.day}</div>
               <div class="detail">${opt.detail}</div>
             </div>
-            <div class="votes">${voteCount} 人<br/>已选</div>
+            <div class="votes">${voteCount} 人<br />已选</div>
           </div>`;
       }).join('');
+      // 按钮：只要至少选一项就启用
+      document.getElementById('submitTimeBtn').disabled = selectedTimes.length === 0;
     }
 
-    function selectTime(index) {
-      selectedTime = index;
-      document.querySelectorAll('.time-card').forEach((card, i) => {
-        card.classList.toggle('selected', i === index);
-      });
-      document.getElementById('submitTimeBtn').disabled = false;
+    // 点击切换多选
+    function toggleTime(index) {
+      const pos = selectedTimes.indexOf(index);
+      if(pos >= 0){
+        selectedTimes.splice(pos,1);
+      }else{
+        selectedTimes.push(index);
+      }
+      renderTimeOptions();
     }
 
-    // ---- 提交时间选择 ----
+    // ---- 提交时间选择（保存数组） ----
     document.getElementById('submitTimeBtn').addEventListener('click', () => {
-      if (selectedTime === null) return;
-      // 以浏览器唯一标识存储，每人仅记录最后一次选择
+      if (selectedTimes.length === 0) return;
       const voterId = localStorage.getItem('voterId') || ('v' + Date.now() + Math.random().toString(36).slice(2,6));
       localStorage.setItem('voterId', voterId);
-      votes[voterId] = selectedTime;
+      votes[voterId] = [...selectedTimes];
       localStorage.setItem('dinnerVotes', JSON.stringify(votes));
-      const opt = TIME_OPTIONS[selectedTime];
-      showToast(`已选择：${opt.day} ${opt.detail.split('·')[0].trim()}`);
+
+      const showText = selectedTimes.map(idx=>{
+        const o = TIME_OPTIONS[idx];
+        return `${o.day} ${o.detail}`;
+      }).join("；");
+      showToast(`已提交 ${selectedTimes.length} 个时间段`);
       renderTimeOptions();
     });
 
     // ---- 祝福墙 ----
     const BLESSING_EMOJIS = ['🌟','🎉','✨','🌸','🎈','💫','🌻','🍀','🎊','🌈'];
     function getAvatarChar(name) {
-      // 取名字第一个字符作为头像
       const trimmed = name.trim();
       if (!trimmed) return '匿';
       return trimmed.charAt(0).toUpperCase();
@@ -530,10 +528,8 @@
             <div class="deco-emoji">${emoji}</div>
           </div>`;
       }).join('');
-      // 新提交时自动滚动到顶部，展示最新祝福
       if (highlightLast) wall.scrollTop = 0;
     }
-
     document.getElementById('submitBlessingBtn').addEventListener('click', () => {
       const name = document.getElementById('blessingName').value.trim();
       const msg = document.getElementById('blessingMsg').value.trim();
@@ -547,7 +543,6 @@
       renderBlessings(true);
       showToast('祝福已送上，感谢！');
     });
-
     // ---- 工具函数 ----
     function showToast(text) {
       const toast = document.getElementById('toast');
@@ -560,7 +555,6 @@
       div.textContent = str;
       return div.innerHTML;
     }
-
     // ---- 页码指示器联动 ----
     const pages = ['page-welcome', 'page-time', 'page-blessing'];
     const dots = document.querySelectorAll('.page-dots .dot');
@@ -573,7 +567,6 @@
       });
     }, { threshold: 0.5 });
     pages.forEach(id => observer.observe(document.getElementById(id)));
-
     // ---- 初始化 ----
     renderGallery();
     renderTimeOptions();
