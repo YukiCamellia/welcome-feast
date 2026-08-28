@@ -55,8 +55,20 @@
       letter-spacing: 0.15em;
       backdrop-filter: blur(8px);
       background: rgba(255,255,255,0.1);
-      margin-bottom: 32px;
+      margin-bottom: 12px;
       animation: fadeInUp 1s ease 0.7s both;
+    }
+    .welcome-place {
+      display: inline-block;
+      padding: 8px 24px;
+      border: 1px solid rgba(255,255,255,0.5);
+      border-radius: 30px;
+      font-size: 0.9rem;
+      letter-spacing: 0.15em;
+      backdrop-filter: blur(8px);
+      background: rgba(255,255,255,0.1);
+      margin-bottom: 32px;
+      animation: fadeInUp 1s ease 0.8s both;
     }
     /* 图片相册 */
     .gallery {
@@ -118,7 +130,6 @@
       margin-bottom: 8px;
     }
     .section-header p { opacity: 0.8; font-size: 0.95rem; letter-spacing: 0.05em; }
-
     /* 关键：时间选项设置最大高度，超出滚动，解决手机显示不全 */
     .time-options-wrap {
       max-height: 42vh;
@@ -129,7 +140,6 @@
     }
     .time-options-wrap::-webkit-scrollbar{width:4px;}
     .time-options-wrap::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.25);border-radius:2px;}
-
     .time-options {
       display: flex;
       flex-direction: column;
@@ -172,7 +182,6 @@
     .time-card .info .day { font-size: 1.1rem; font-weight: 600; }
     .time-card .info .detail { font-size: 0.85rem; opacity: 0.75; margin-top: 2px; }
     .time-card .votes { font-size: 0.8rem; opacity: 0.7; text-align: right; white-space: nowrap; }
-
     .submit-btn {
       margin-top: 18px;
       padding: 14px 48px;
@@ -190,7 +199,6 @@
     .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(255,215,0,0.55); }
     .submit-btn:active { transform: translateY(0); }
     .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
     .toast {
       position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-100px);
       background: rgba(255,255,255,0.95); color: #2b5876;
@@ -199,7 +207,6 @@
       transition: transform 0.4s ease; z-index: 100;
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
-
     /* ========== 第三页：祝福墙 ========== */
     #page-blessing {
       background: linear-gradient(170deg, #42275a 0%, #734b6d 50%, #2c3e50 100%);
@@ -360,12 +367,10 @@
       <h1 class="welcome-title">迎新聚餐</h1>
       <p class="welcome-subtitle">致 2026 级新同学</p>
       <div class="welcome-date">期待与你相聚</div>
-      <!-- 图片相册：将下方 src 替换为你的图片路径或网络链接即可，也可增删 gallery-item -->
-      <div class="gallery" id="gallery">
-        <div class="gallery-item"><img src="welcome-feast/door.jpg" alt="照片1" onerror="this.parentElement.classList.add('placeholder');this.style.display='none';this.parentElement.textContent='🌸';"></div>
-        <div class="gallery-item"><img src="welcome-feast/sakura.jpg" alt="照片2" onerror="this.parentElement.classList.add('placeholder');this.style.display='none';this.parentElement.textContent='🎉';"></div>
-        <div class="gallery-item"><img src="welcome-feast/students.jpg" alt="照片3" onerror="this.parentElement.classList.add('placeholder');this.style.display='none';this.parentElement.textContent='🎓';"></div>
-      </div>
+      <!-- 新增就餐地点 -->
+      <div class="welcome-place">📍就餐地点：佬肥猫（交大闵行校区旁）</div>
+      <!-- !!!这里清空，图片全部由JS renderGallery生成，不再写死img标签，只维护JS一处!!! -->
+      <div class="gallery" id="gallery"></div>
       <p style="opacity:0.75; font-size:0.85rem; line-height:1.8;">
         亲爱的学弟学妹，<br />欢迎加入上海交大的大家庭！<br />让我们在聚餐中相识相知，共启新程
       </p>
@@ -413,15 +418,14 @@
   </section>
   <script>
     /* ============================================================
-     *  学长配置区 —— 请在此处修改你的自定义内容
+     *  学长配置区 ——【⚠️这里是唯一修改图片路径的地方！仅此一处！！】
      * ============================================================ */
-    // ① 欢迎页图片：现在图片放在仓库根目录，使用 ./文件名
     const WELCOME_IMAGES = [
-      'welcome-feast/door.jpg',
-      'welcome-feast/sakura.jpg',
-      'welcome-feast/students.jpg',
+      '/welcome-feast/door.jpg',
+      '/welcome-feast/sakura.jpg',
+      '/welcome-feast/students.jpg',
     ];
-    // ② 聚餐时间选项：修复重复条目
+    // ② 聚餐时间选项
     const TIME_OPTIONS = [
       { day: '9月13日 周日', detail: '18:00 - 20:30' },
       { day: '9月13日 周日', detail: '11:30 - 14:00' },
@@ -435,9 +439,9 @@
       { day: '9月27日 周日', detail: '11:30 - 14:00' },
     ];
     /* ============================================================
-     *  以下为功能逻辑，多选版本
+     *  以下为功能逻辑，多选版本，无需改动
      * ============================================================ */
-    // ---- 渲染欢迎页图片 ----
+    // ---- 渲染欢迎页图片（JS自动生成全部img标签） ----
     function renderGallery() {
       const gallery = document.getElementById('gallery');
       if (WELCOME_IMAGES.length > 0) {
@@ -446,12 +450,9 @@
         ).join('');
       }
     }
-
     // ========== 多选逻辑：selectedTimes 数组保存选中索引 ==========
     let selectedTimes = [];
-    // votes：每个人的选择数组 {voterId:[0,2,3]}
     const votes = JSON.parse(localStorage.getItem('dinnerVotes') || '{}');
-
     function renderTimeOptions() {
       const container = document.getElementById('timeOptions');
       container.innerHTML = TIME_OPTIONS.map((opt, i) => {
@@ -467,10 +468,8 @@
             <div class="votes">${voteCount} 人<br />已选</div>
           </div>`;
       }).join('');
-      // 按钮：只要至少选一项就启用
       document.getElementById('submitTimeBtn').disabled = selectedTimes.length === 0;
     }
-
     // 点击切换多选
     function toggleTime(index) {
       const pos = selectedTimes.indexOf(index);
@@ -481,7 +480,6 @@
       }
       renderTimeOptions();
     }
-
     // ---- 提交时间选择（保存数组） ----
     document.getElementById('submitTimeBtn').addEventListener('click', () => {
       if (selectedTimes.length === 0) return;
@@ -489,7 +487,6 @@
       localStorage.setItem('voterId', voterId);
       votes[voterId] = [...selectedTimes];
       localStorage.setItem('dinnerVotes', JSON.stringify(votes));
-
       const showText = selectedTimes.map(idx=>{
         const o = TIME_OPTIONS[idx];
         return `${o.day} ${o.detail}`;
@@ -497,7 +494,6 @@
       showToast(`已提交 ${selectedTimes.length} 个时间段`);
       renderTimeOptions();
     });
-
     // ---- 祝福墙 ----
     const BLESSING_EMOJIS = ['🌟','🎉','✨','🌸','🎈','💫','🌻','🍀','🎊','🌈'];
     function getAvatarChar(name) {
