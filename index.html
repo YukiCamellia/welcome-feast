@@ -447,6 +447,29 @@ const TIME_OPTIONS = [
 let selectedTimes = [];
 const BLESSING_EMOJIS = ['≽^⚈⩊⚈^≼','૮๑′0`๑ა','◤•͈ᴥ•͈◥ ୭','˚₊⳻ ̫⳺੭˚','^⎚‸⎚^','՞˶•⩊•˶՞ಣ','(ᗜ ˰ ᗜ) ​','۶•͈⚇•͈♡','ε(´｡•᎑•`)っ♡','₊⁺♡‌₊⁺'];
 
+// 【新增】统计每个时间段报名人数
+async function loadTimeVoteCount(){
+  const {data,error}=await sbClient.from("dinner_signups").select("selected_times");
+  if(error){
+    console.error("读取报名统计失败",error);
+    return;
+  }
+  const countArr=new Array(TIME_OPTIONS.length).fill(0);
+  data.forEach(item=>{
+    const userSelList=item.selected_times;
+    TIME_OPTIONS.forEach((opt,idx)=>{
+      const targetText=`${opt.day} ${opt.detail}`;
+      if(userSelList.includes(targetText)){
+        countArr[idx]++;
+      }
+    })
+  })
+  document.querySelectorAll(".time-card").forEach(card=>{
+    const i=Number(card.dataset.index);
+    card.querySelector(".votes").innerText=`${countArr[i]}人`;
+  })
+}
+
 function renderGallery() {
   const gallery = document.getElementById('gallery');
   if (WELCOME_IMAGES.length > 0) {
@@ -506,6 +529,7 @@ document.getElementById('submitTimeBtn').addEventListener('click', async () => {
     showToast("✅报名已提交云端！");
     selectedTimes = [];
     renderTimeOptions();
+    await loadTimeVoteCount(); //提交完刷新人数
   }
 });
 
@@ -532,7 +556,7 @@ document.getElementById('submitBlessingBtn').addEventListener('click', async () 
   }
 });
 
-// ==========加载祝福，增加调试打印 ==========
+// ==========加载祝福 ==========
 async function loadAllBlessings() {
   console.log("开始拉取祝福数据……");
   const wall = document.getElementById('blessingWall');
@@ -600,6 +624,7 @@ pages.forEach(id => observer.observe(document.getElementById(id)));
 (async function init(){
   renderGallery();
   renderTimeOptions();
+  await loadTimeVoteCount(); //页面加载读取时段人数
   await loadAllBlessings();
 })();
 </script>
