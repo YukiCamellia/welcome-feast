@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>迎新聚餐电子请柬</title>
+  <style>
+    /* ========== 全局样式 ========== */
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #0f0c29;
+      color: #fff;
+      overflow-x: hidden;
+    }
+    .page {
+      min-height: 100vh;
+      height: 100vh;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 24px;
+    }
+
+    /* ========== 第一页：欢迎页 ========== */
+    #page-welcome {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    }
+    .welcome-content { text-align: center; z-index: 2; max-width: 520px; width: 100%; }
+    .welcome-title {
+      font-size: clamp(2.2rem, 8vw, 3.6rem);
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-shadow: 0 4px 30px rgba(0,0,0,0.4);
+      margin-bottom: 12px;
+      animation: fadeInUp 1s ease 0.2s both;
+    }
+    .welcome-subtitle {
+      font-size: clamp(0.95rem, 3.5vw, 1.15rem);
+      opacity: 0.92;
+      letter-spacing: 0.2em;
+      margin-bottom: 28px;
+      animation: fadeInUp 1s ease 0.5s both;
+    }
+    .welcome-date {
+      display: inline-block;
+      padding: 8px 24px;
+      border: 1px solid rgba(255,255,255,0.5);
+      border-radius: 30px;
+      font-size: 0.9rem;
+      letter-spacing: 0.15em;
+      backdrop-filter: blur(8px);
+      background: rgba(255,255,255,0.1);
+      margin-bottom: 32px;
+      animation: fadeInUp 1s ease 0.7s both;
+    }
+    /* 图片相册 */
+    .gallery {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+      animation: fadeInUp 1s ease 0.9s both;
+    }
+    .gallery-item {
+      width: 130px;
+      height: 130px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 3px solid rgba(255,255,255,0.4);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      transition: transform 0.4s ease;
+      cursor: pointer;
+    }
+    .gallery-item:hover { transform: scale(1.05) translateY(-4px); }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .gallery-item.placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.15);
+      font-size: 2rem;
+    }
+    /* 滚动提示 */
+    .scroll-hint {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      animation: bounce 2s infinite;
+      z-index: 2;
+    }
+    .scroll-hint span { display: block; font-size: 0.8rem; letter-spacing: 0.2em; opacity: 0.8; margin-bottom: 8px; }
+    .scroll-hint .arrow { font-size: 1.5rem; }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(10px); }
+    }
+
+    /* ========== 第二页：时间选择 ========== */
+    #page-time {
+      background: linear-gradient(160deg, #2b5876 0%, #4e4376 100%);
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 32px;
+      animation: fadeInUp 0.8s ease both;
+    }
+    .section-header h2 {
+      font-size: clamp(1.6rem, 6vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+    .section-header p { opacity: 0.8; font-size: 0.95rem; letter-spacing: 0.05em; }
+    .time-options {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-width: 420px;
+      width: 100%;
+      z-index: 2;
+    }
+    .time-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 20px;
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      animation: fadeInUp 0.6s ease both;
+    }
+    .time-card:nth-child(1) { animation-delay: 0.1s; }
+    .time-card:nth-child(2) { animation-delay: 0.2s; }
+    .time-card:nth-child(3) { animation-delay: 0.3s; }
+    .time-card:nth-child(4) { animation-delay: 0.4s; }
+    .time-card:nth-child(5) { animation-delay: 0.5s; }
+    .time-card:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.35); transform: translateX(4px); }
+    .time-card.selected {
+      background: rgba(255,255,255,0.2);
+      border-color: #ffd700;
+      box-shadow: 0 0 20px rgba(255,215,0,0.3);
+    }
+    .time-card .radio {
+      width: 24px; height: 24px;
+      border: 2px solid rgba(255,255,255,0.5);
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s ease;
+    }
+    .time-card.selected .radio { border-color: #ffd700; }
+    .time-card.selected .radio::after {
+      content: ''; width: 12px; height: 12px; background: #ffd700; border-radius: 50%;
+    }
+    .time-card .info { flex: 1; }
+    .time-card .info .day { font-size: 1.1rem; font-weight: 600; }
+    .time-card .info .detail { font-size: 0.85rem; opacity: 0.75; margin-top: 2px; }
+    .time-card .votes { font-size: 0.8rem; opacity: 0.7; text-align: right; white-space: nowrap; }
+    .submit-btn {
+      margin-top: 24px;
+      padding: 14px 48px;
+      border: none;
+      border-radius: 30px;
+      background: linear-gradient(135deg, #ffd700, #ffb347);
+      color: #1a1a2e;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(255,215,0,0.4);
+      animation: fadeInUp 0.6s ease 0.6s both;
+    }
+    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(255,215,0,0.55); }
+    .submit-btn:active { transform: translateY(0); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .toast {
+      position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-100px);
+      background: rgba(255,255,255,0.95); color: #2b5876;
+      padding: 12px 28px; border-radius: 30px; font-weight: 600; font-size: 0.95rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      transition: transform 0.4s ease; z-index: 100;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ========== 第三页：祝福墙 ========== */
+    #page-blessing {
+      background: linear-gradient(170deg, #42275a 0%, #734b6d 50%, #2c3e50 100%);
+    }
+    .blessing-form {
+      max-width: 460px; width: 100%; z-index: 2;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .blessing-form input, .blessing-form textarea {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      font-size: 0.95rem;
+      font-family: inherit;
+      backdrop-filter: blur(8px);
+      transition: all 0.3s ease;
+    }
+    .blessing-form input::placeholder, .blessing-form textarea::placeholder { color: rgba(255,255,255,0.5); }
+    .blessing-form input:focus, .blessing-form textarea:focus {
+      outline: none; border-color: #ffd700; background: rgba(255,255,255,0.12);
+    }
+    .blessing-form textarea { min-height: 80px; resize: vertical; }
+
+    /* 祝福统计条 */
+    .blessing-stats {
+      max-width: 460px; width: 100%;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 18px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 30px;
+      margin-top: 18px; margin-bottom: 14px;
+      backdrop-filter: blur(8px);
+      font-size: 0.85rem;
+    }
+    .blessing-stats .count { color: #ffd700; font-weight: 700; font-size: 1rem; }
+    .blessing-stats .count span { font-size: 1.4rem; margin-right: 4px; }
+
+    /* 瀑布流祝福墙 */
+    .blessing-wall {
+      max-width: 460px; width: 100%;
+      columns: 2; column-gap: 12px;
+      max-height: 360px; overflow-y: auto; padding: 4px 6px 4px 0;
+    }
+    .blessing-wall::-webkit-scrollbar { width: 4px; }
+    .blessing-wall::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+
+    /* 彩色祝福卡片 */
+    .blessing-card {
+      break-inside: avoid;
+      margin-bottom: 12px;
+      padding: 16px 14px 14px;
+      border-radius: 18px;
+      position: relative;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+      animation: cardPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      overflow: hidden;
+    }
+    .blessing-card:hover {
+      transform: translateY(-3px) rotate(-1deg);
+      box-shadow: 0 10px 32px rgba(0,0,0,0.28);
+    }
+    .blessing-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: rgba(255,255,255,0.4);
+    }
+    /* 6 种随机渐变配色 */
+    .blessing-card.c1 { background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%); color: #5d3a3a; }
+    .blessing-card.c2 { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); color: #2c4865; }
+    .blessing-card.c3 { background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%); color: #4a3a5d; }
+    .blessing-card.c4 { background: linear-gradient(135deg, #fdcbf1 0%, #e6dee9 100%); color: #5d3a5d; }
+    .blessing-card.c5 { background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%); color: #2c4a5d; }
+    .blessing-card.c6 { background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%); color: #2c5d3a; }
+
+    .blessing-card .card-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+    }
+    .blessing-card .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.55);
+      font-weight: 700; font-size: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      flex-shrink: 0;
+    }
+    .blessing-card .name {
+      font-weight: 700; font-size: 0.95rem; line-height: 1.2;
+      flex: 1; min-width: 0;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .blessing-card .msg {
+      font-size: 0.9rem; line-height: 1.65;
+      word-break: break-word;
+    }
+    .blessing-card .time {
+      font-size: 0.7rem; opacity: 0.6; margin-top: 8px; text-align: right;
+    }
+    .blessing-card .deco-emoji {
+      position: absolute; bottom: 8px; right: 10px;
+      font-size: 1.4rem; opacity: 0.35;
+    }
+    @keyframes cardPop {
+      0% { opacity: 0; transform: scale(0.6) translateY(20px) rotate(-8deg); }
+      60% { transform: scale(1.05) translateY(-4px) rotate(2deg); }
+      100% { opacity: 1; transform: scale(1) translateY(0) rotate(0); }
+    }
+    .empty-hint {
+      text-align: center; opacity: 0.5; font-size: 0.9rem; padding: 30px 20px;
+      grid-column: 1 / -1;
+    }
+
+    /* ========== 通用动画 ========== */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 6px 24px rgba(0,0,0,0.18); }
+      50% { box-shadow: 0 0 32px rgba(255,215,0,0.85), 0 6px 24px rgba(0,0,0,0.18); }
+    }
+    /* 背景装饰 */
+    .deco-circle {
+      position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      pointer-events: none;
+    }
+    .deco-1 { width: 300px; height: 300px; top: -100px; left: -80px; }
+    .deco-2 { width: 200px; height: 200px; bottom: -60px; right: -40px; }
+    .deco-3 { width: 150px; height: 150px; top: 20%; right: 10%; background: rgba(255,215,0,0.05); }
+
+    /* 页码指示器 */
+    .page-dots {
+      position: fixed; right: 14px; top: 50%; transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 10px; z-index: 50;
+    }
+    .page-dots .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: rgba(255,255,255,0.35); cursor: pointer; transition: all 0.3s ease;
+    }
+    .page-dots .dot.active { background: #ffd700; height: 24px; border-radius: 4px; }
+
+    @media (max-width: 400px) {
+      .gallery-item { width: 100px; height: 100px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 页码指示器 -->
+  <div class="page-dots">
+    <div class="dot active" onclick="document.getElementById('page-welcome').scrollIntoView()"></div>
+    <div class="dot" onclick="document.getElementById('page-time').scrollIntoView()"></div>
+    <div class="dot" onclick="document.getElementById('page-blessing').scrollIntoView()"></div>
+  </div>
+
+  <!-- 提示弹窗 -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ============ 第一页：欢迎页 ============ -->
+  <section class="page" id="page-welcome">
+    <div class="deco-circle deco-1"></div>
+    <div class="deco-circle deco-2"></div>
+    <div class="deco-circle deco-3"></div>
+    <div class="welcome-content">
+      <h1 class="welcome-title">迎新聚餐</h1>
+      <p class="welcome-subtitle">致 2026 级新同学</p>
+      <div class="welcome-date">期待与你相聚</div>
+      <!-- 图片相册：将下方 src 替换为你的图片路径或网络链接即可，也可增删 gallery-item -->
+      <div class="gallery" id="gallery">
+        <div class="gallery-item"><img src="" alt="照片1" onerror="this.parentElement.classList.add('placeholder');this.style.display='none';this.parentElement.textContent='🌸';"></div>
+        <div class="gallery-item"><img src="" alt="照片2" onerror="this.parentElement.classList.add('placeholder');this.style.display='none';this.parentElement.textContent='🎉';"></div>
+        <div class="gallery-item"><img src="" alt="照片3" onerror="this.parentElement.classList.add('placeholder');this.style.display='none';this.parentElement.textContent='🎓';"></div>
+      </div>
+      <p style="opacity:0.75; font-size:0.85rem; line-height:1.8;">
+        亲爱的学弟学妹，<br/>欢迎加入上海交大的大家庭！<br/>让我们在聚餐中相识相知，共启新程
+      </p>
+    </div>
+    <div class="scroll-hint">
+      <span>下滑查看更多</span>
+      <div class="arrow">↓</div>
+    </div>
+  </section>
+
+  <!-- ============ 第二页：时间选择 ============ -->
+  <section class="page" id="page-time">
+    <div class="deco-circle deco-1"></div>
+    <div class="deco-circle deco-2"></div>
+    <div class="section-header">
+      <h2>选择聚餐时间</h2>
+      <p>请选择你方便的时间段，我们将根据多数人意愿确定最终时间</p>
+    </div>
+    <div class="time-options" id="timeOptions">
+      <!-- 时间选项由 JS 动态生成 -->
+    </div>
+    <button class="submit-btn" id="submitTimeBtn" disabled>确认选择</button>
+  </section>
+
+  <!-- ============ 第三页：祝福墙 ============ -->
+  <section class="page" id="page-blessing">
+    <div class="deco-circle deco-1"></div>
+    <div class="deco-circle deco-3"></div>
+    <div class="section-header">
+      <h2>留下你的祝福</h2>
+      <p>写下对大学生活的期待与祝福，一起开启新旅程</p>
+    </div>
+    <div class="blessing-form">
+      <input type="text" id="blessingName" placeholder="你的名字 / 昵称" maxlength="20" />
+      <textarea id="blessingMsg" placeholder="写下你的祝福..." maxlength="200"></textarea>
+      <button class="submit-btn" id="submitBlessingBtn" style="align-self:center;">送上祝福</button>
+    </div>
+    <div class="blessing-stats">
+      <div class="count"><span id="blessingCount">0</span> 条祝福</div>
+      <div style="opacity:0.7;">下滑查看全部 ↓</div>
+    </div>
+    <div class="blessing-wall" id="blessingWall">
+      <div class="empty-hint">还没有祝福，快来第一个留言吧～</div>
+    </div>
+  </section>
+
+  <script>
+    /* ============================================================
+     *  学长配置区 —— 请在此处修改你的自定义内容
+     * ============================================================ */
+
+    // ① 欢迎页图片：填入图片路径或网络链接，留空则显示默认图标
+    //    支持本地图片（如 images/1.jpg）或网络图片（https://...）
+    const WELCOME_IMAGES = [
+      'images/door.jpg',
+      'images/sakura.jpg',
+      'images/students.jpg',
+    ];
+
+    // ② 聚餐时间选项：自由增删，每项含 day（日期）与 detail（时间段+描述）
+    const TIME_OPTIONS = [
+      { day: '9月13日 周日', detail: '18:00 - 20:30  ·  ' },
+      { day: '9月13日 周日', detail: '11:30 - 14:00  ·  ' },
+      { day: '9月20日 周日', detail: '18:00 - 20:30  ·  ' },
+      { day: '9月20日 周日', detail: '18:00 - 20:30  ·  ' },
+      { day: '9月25日 周五（中秋）', detail: '18:00 - 20:30  ·  ' },
+      { day: '9月25日 周五（中秋）', detail: '11:30 - 14:00  ·  ' },
+      { day: '9月26日 周六', detail: '18:00 - 20:30  ·  ' },
+      { day: '9月26日 周六', detail: '11:30 - 14:00  ·  ' },
+      { day: '9月27日 周六', detail: '18:00 - 20:30  ·  ' },
+      { day: '9月27日 周六', detail: '11:30 - 14:00  ·  ' },
+    ];
+
+    /* ============================================================
+     *  以下为功能逻辑，一般无需修改
+     * ============================================================ */
+
+    // ---- 渲染欢迎页图片 ----
+    function renderGallery() {
+      const gallery = document.getElementById('gallery');
+      if (WELCOME_IMAGES.length > 0) {
+        gallery.innerHTML = WELCOME_IMAGES.map(src =>
+          `<div class="gallery-item"><img src="${src}" alt="照片" onerror="this.parentElement.classList.add('placeholder');this.style.display='none';this.parentElement.textContent='🌸';"></div>`
+        ).join('');
+      }
+    }
+
+    // ---- 渲染时间选项 ----
+    let selectedTime = null;
+    const votes = JSON.parse(localStorage.getItem('dinnerVotes') || '{}');
+
+    function renderTimeOptions() {
+      const container = document.getElementById('timeOptions');
+      container.innerHTML = TIME_OPTIONS.map((opt, i) => {
+        const voteCount = Object.values(votes).filter(v => v === i).length;
+        return `
+          <div class="time-card" data-index="${i}" onclick="selectTime(${i})">
+            <div class="radio"></div>
+            <div class="info">
+              <div class="day">${opt.day}</div>
+              <div class="detail">${opt.detail}</div>
+            </div>
+            <div class="votes">${voteCount} 人<br/>已选</div>
+          </div>`;
+      }).join('');
+    }
+
+    function selectTime(index) {
+      selectedTime = index;
+      document.querySelectorAll('.time-card').forEach((card, i) => {
+        card.classList.toggle('selected', i === index);
+      });
+      document.getElementById('submitTimeBtn').disabled = false;
+    }
+
+    // ---- 提交时间选择 ----
+    document.getElementById('submitTimeBtn').addEventListener('click', () => {
+      if (selectedTime === null) return;
+      // 以浏览器唯一标识存储，每人仅记录最后一次选择
+      const voterId = localStorage.getItem('voterId') || ('v' + Date.now() + Math.random().toString(36).slice(2,6));
+      localStorage.setItem('voterId', voterId);
+      votes[voterId] = selectedTime;
+      localStorage.setItem('dinnerVotes', JSON.stringify(votes));
+      const opt = TIME_OPTIONS[selectedTime];
+      showToast(`已选择：${opt.day} ${opt.detail.split('·')[0].trim()}`);
+      renderTimeOptions();
+    });
+
+    // ---- 祝福墙 ----
+    const BLESSING_EMOJIS = ['🌟','🎉','✨','🌸','🎈','💫','🌻','🍀','🎊','🌈'];
+    function getAvatarChar(name) {
+      // 取名字第一个字符作为头像
+      const trimmed = name.trim();
+      if (!trimmed) return '匿';
+      return trimmed.charAt(0).toUpperCase();
+    }
+    function renderBlessings(highlightLast) {
+      const wall = document.getElementById('blessingWall');
+      const blessings = JSON.parse(localStorage.getItem('blessings') || '[]');
+      document.getElementById('blessingCount').textContent = blessings.length;
+      if (blessings.length === 0) {
+        wall.innerHTML = '<div class="empty-hint">还没有祝福，快来第一个留言吧～</div>';
+        return;
+      }
+      wall.innerHTML = blessings.slice().reverse().map((b, i) => {
+        const colorClass = 'c' + ((i % 6) + 1);
+        const emoji = BLESSING_EMOJIS[i % BLESSING_EMOJIS.length];
+        const isNew = highlightLast && i === 0;
+        return `
+          <div class="blessing-card ${colorClass}"${isNew ? ' style="animation:cardPop 0.7s cubic-bezier(0.34,1.56,0.64,1) both, glowPulse 1.6s ease 0.7s 2;"' : ''}>
+            <div class="card-header">
+              <div class="avatar">${escapeHtml(getAvatarChar(b.name))}</div>
+              <div class="name">${escapeHtml(b.name)}</div>
+            </div>
+            <div class="msg">${escapeHtml(b.msg)}</div>
+            <div class="time">${b.time}</div>
+            <div class="deco-emoji">${emoji}</div>
+          </div>`;
+      }).join('');
+      // 新提交时自动滚动到顶部，展示最新祝福
+      if (highlightLast) wall.scrollTop = 0;
+    }
+
+    document.getElementById('submitBlessingBtn').addEventListener('click', () => {
+      const name = document.getElementById('blessingName').value.trim();
+      const msg = document.getElementById('blessingMsg').value.trim();
+      if (!name) { showToast('请先填写你的名字'); return; }
+      if (!msg) { showToast('请写下你的祝福'); return; }
+      const blessings = JSON.parse(localStorage.getItem('blessings') || '[]');
+      blessings.push({ name, msg, time: new Date().toLocaleString('zh-CN', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) });
+      localStorage.setItem('blessings', JSON.stringify(blessings));
+      document.getElementById('blessingName').value = '';
+      document.getElementById('blessingMsg').value = '';
+      renderBlessings(true);
+      showToast('祝福已送上，感谢！');
+    });
+
+    // ---- 工具函数 ----
+    function showToast(text) {
+      const toast = document.getElementById('toast');
+      toast.textContent = text;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2400);
+    }
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // ---- 页码指示器联动 ----
+    const pages = ['page-welcome', 'page-time', 'page-blessing'];
+    const dots = document.querySelectorAll('.page-dots .dot');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const idx = pages.indexOf(entry.target.id);
+          dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        }
+      });
+    }, { threshold: 0.5 });
+    pages.forEach(id => observer.observe(document.getElementById(id)));
+
+    // ---- 初始化 ----
+    renderGallery();
+    renderTimeOptions();
+    renderBlessings();
+  </script>
+</body>
+</html>
