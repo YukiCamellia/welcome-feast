@@ -419,10 +419,9 @@
     </div>
   </section>
 <script>
-/* ========== Supabase配置区，填入你自己的信息 ========== */
+/* ========== Supabase配置区 ========== */
 const SUPABASE_URL = "https://hiqnhmizasffzgfhpspd.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_FWVCooHb_ZYUviDtoTn6lg_zguUAsqM";
-// 修复冲突：全局已经存在supabase对象，取出createClient，实例命名为sbClient，不再占用supabase变量名
 const { createClient } = supabase;
 const sbClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -484,7 +483,7 @@ function toggleTime(index) {
   renderTimeOptions();
 }
 
-// 提交时间段报名写入云端，全部替换为sbClient
+// 提交时间段报名
 document.getElementById('submitTimeBtn').addEventListener('click', async () => {
   if (selectedTimes.length === 0) return;
   const userName = prompt("请输入你的姓名/昵称：");
@@ -501,6 +500,7 @@ document.getElementById('submitTimeBtn').addEventListener('click', async () => {
     selected_times: selectTextArr
   }]);
   if(error){
+    console.error("报名提交错误", error);
     showToast("提交失败："+error.message);
   }else{
     showToast("✅报名已提交云端！");
@@ -509,7 +509,7 @@ document.getElementById('submitTimeBtn').addEventListener('click', async () => {
   }
 });
 
-// 提交祝福写入云端
+// 提交祝福
 document.getElementById('submitBlessingBtn').addEventListener('click', async () => {
   const name = document.getElementById('blessingName').value.trim();
   const msg = document.getElementById('blessingMsg').value.trim();
@@ -522,6 +522,7 @@ document.getElementById('submitBlessingBtn').addEventListener('click', async () 
   }]);
 
   if(error){
+    console.error("祝福提交错误",error);
     showToast("祝福提交失败："+error.message);
   }else{
     showToast('✅祝福已送上！');
@@ -531,17 +532,26 @@ document.getElementById('submitBlessingBtn').addEventListener('click', async () 
   }
 });
 
-// 从云端加载全部祝福
+// ==========加载祝福，增加调试打印 ==========
 async function loadAllBlessings() {
+  console.log("开始拉取祝福数据……");
   const wall = document.getElementById('blessingWall');
   const {data, error} = await sbClient
     .from('blessings')
     .select('*')
     .order('created_at', {ascending: false});
 
+  console.log("拉取结果 data:", data);
+  console.log("拉取结果 error:", error);
+
   document.getElementById('blessingCount').textContent = data ? data.length : 0;
 
-  if(error || !data || data.length ===0){
+  if(error){
+    wall.innerHTML = `<div class="empty-hint">读取祝福失败：${error.message}</div>`;
+    showToast("读取祝福失败:"+error.message);
+    return;
+  }
+  if(!data || data.length ===0){
     wall.innerHTML = '<div class="empty-hint">还没有祝福，快来第一个留言吧～</div>';
     return;
   }
@@ -568,7 +578,6 @@ function showToast(text) {
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 2400);
 }
-
 function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
@@ -587,6 +596,7 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.5 });
 pages.forEach(id => observer.observe(document.getElementById(id)));
 
+// 页面打开加载
 (async function init(){
   renderGallery();
   renderTimeOptions();
