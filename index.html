@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>迎新聚餐电子请柬</title>
+  <!-- 引入Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     /* ========== 全局样式 ========== */
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -416,159 +418,181 @@
       <div class="empty-hint">还没有祝福，快来第一个留言吧～ </div>
     </div>
   </section>
-  <script>
-    /* ============================================================
-     *  学长配置区 ——【⚠️这里是唯一修改图片路径的地方！仅此一处！！】
-     * ============================================================ */
-    const WELCOME_IMAGES = [
-      "https://cdn.jsdelivr.net/gh/yukicamellia/welcome-feast@main/door.jpg",
-      "https://cdn.jsdelivr.net/gh/yukicamellia/welcome-feast@main/sakura.jpg",
-      "https://cdn.jsdelivr.net/gh/yukicamellia/welcome-feast@main/students.jpg"
-    ];
-    // ② 聚餐时间选项
-    const TIME_OPTIONS = [
-      { day: '9月13日 周日', detail: '11:30 - 14:00' },
-      { day: '9月13日 周日', detail: '18:00 - 20:30' },
-      { day: '9月25日 周五（中秋）', detail: '11:30 - 14:00' },
-      { day: '9月25日 周五（中秋）', detail: '18:00 - 20:30' },
-      { day: '9月26日 周六', detail: '11:30 - 14:00' },
-      { day: '9月26日 周六', detail: '18:00 - 20:30' },
-      { day: '9月27日 周日', detail: '11:30 - 14:00' },
-      { day: '9月27日 周日', detail: '18:00 - 20:30' },
-      { day: '10月1日（国庆） 周四', detail: '11:30 - 14:00' },
-      { day: '10月1日（国庆）周四', detail: '18:00 - 20:30' },
-      { day: '10月7日 周三（国庆结束）', detail: '11:30 - 14:00' },
-      { day: '10月7日 周三（国庆结束）', detail: '18:00 - 20:30' },
-    ];
-    /* ============================================================
-     *  以下为功能逻辑，多选版本，无需改动
-     * ============================================================ */
-    // ---- 渲染欢迎页图片（JS自动生成全部img标签） ----
-    function renderGallery() {
-      const gallery = document.getElementById('gallery');
-      if (WELCOME_IMAGES.length > 0) {
-        gallery.innerHTML = WELCOME_IMAGES.map(src =>
-          `<div class="gallery-item"><img src="${src}" alt="照片" onerror="this.parentElement.classList.add('placeholder');this.style.display='none';this.parentElement.textContent='🌸';"></div>`
-        ).join('');
-      }
-    }
-    // ========== 多选逻辑：selectedTimes 数组保存选中索引 ==========
-    let selectedTimes = [];
-    const votes = JSON.parse(localStorage.getItem('dinnerVotes') || '{}');
-    function renderTimeOptions() {
-      const container = document.getElementById('timeOptions');
-      container.innerHTML = TIME_OPTIONS.map((opt, i) => {
-        const voteCount = Object.values(votes).filter(arr => Array.isArray(arr) && arr.includes(i)).length;
-        const isSel = selectedTimes.includes(i);
-        return `
-          <div class="time-card ${isSel?'selected':''}" data-index="${i}" onclick="toggleTime(${i})">
-            <div class="radio"></div>
-            <div class="info">
-              <div class="day">${opt.day}</div>
-              <div class="detail">${opt.detail}</div>
-            </div>
-            <div class="votes">${voteCount} 人<br />已选</div>
-          </div>`;
-      }).join('');
-      document.getElementById('submitTimeBtn').disabled = selectedTimes.length === 0;
-    }
-    // 点击切换多选
-    function toggleTime(index) {
-      const pos = selectedTimes.indexOf(index);
-      if(pos >= 0){
-        selectedTimes.splice(pos,1);
-      }else{
-        selectedTimes.push(index);
-      }
-      renderTimeOptions();
-    }
-    // ---- 提交时间选择（保存数组） ----
-    document.getElementById('submitTimeBtn').addEventListener('click', () => {
-      if (selectedTimes.length === 0) return;
-      const voterId = localStorage.getItem('voterId') || ('v' + Date.now() + Math.random().toString(36).slice(2,6));
-      localStorage.setItem('voterId', voterId);
-      votes[voterId] = [...selectedTimes];
-      localStorage.setItem('dinnerVotes', JSON.stringify(votes));
-      const showText = selectedTimes.map(idx=>{
-        const o = TIME_OPTIONS[idx];
-        return `${o.day} ${o.detail}`;
-      }).join("；");
-      showToast(`已提交 ${selectedTimes.length} 个时间段`);
-      renderTimeOptions();
-    });
-    // ---- 祝福墙 ----
-    const BLESSING_EMOJIS = ['≽^⚈⩊⚈^≼','૮๑′0`๑ა','◤•͈ᴥ•͈◥ ୭','˚₊⳻ ̫⳺੭˚','^⎚‸⎚^','՞˶•⩊•˶՞ಣ','(ᗜ ˰ ᗜ) ​','۶•͈⚇•͈♡','ε(´｡•᎑•`)っ♡','₊⁺♡‌₊⁺'];
-    function getAvatarChar(name) {
-      const trimmed = name.trim();
-      if (!trimmed) return '匿';
-      return trimmed.charAt(0).toUpperCase();
-    }
-    function renderBlessings(highlightLast) {
-      const wall = document.getElementById('blessingWall');
-      const blessings = JSON.parse(localStorage.getItem('blessings') || '[]');
-      document.getElementById('blessingCount').textContent = blessings.length;
-      if (blessings.length === 0) {
-        wall.innerHTML = '<div class="empty-hint">还没有祝福，快来第一个留言吧～</div>';
-        return;
-      }
-      wall.innerHTML = blessings.slice().reverse().map((b, i) => {
-        const colorClass = 'c' + ((i % 6) + 1);
-        const emoji = BLESSING_EMOJIS[i % BLESSING_EMOJIS.length];
-        const isNew = highlightLast && i === 0;
-        return `
-          <div class="blessing-card ${colorClass}"${isNew ? ' style="animation:cardPop 0.7s cubic-bezier(0.34,1.56,0.64,1) both, glowPulse 1.6s ease 0.7s 2;"' : ''}>
-            <div class="card-header">
-              <div class="avatar">${escapeHtml(getAvatarChar(b.name))}</div>
-              <div class="name">${escapeHtml(b.name)}</div>
-            </div>
-            <div class="msg">${escapeHtml(b.msg)}</div>
-            <div class="time">${b.time}</div>
-            <div class="deco-emoji">${emoji}</div>
-          </div>`;
-      }).join('');
-      if (highlightLast) wall.scrollTop = 0;
-    }
-    document.getElementById('submitBlessingBtn').addEventListener('click', () => {
-      const name = document.getElementById('blessingName').value.trim();
-      const msg = document.getElementById('blessingMsg').value.trim();
-      if (!name) { showToast('请先填写你的名字'); return; }
-      if (!msg) { showToast('请写下你的祝福'); return; }
-      const blessings = JSON.parse(localStorage.getItem('blessings') || '[]');
-      blessings.push({ name, msg, time: new Date().toLocaleString('zh-CN', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) });
-      localStorage.setItem('blessings', JSON.stringify(blessings));
-      document.getElementById('blessingName').value = '';
-      document.getElementById('blessingMsg').value = '';
-      renderBlessings(true);
-      showToast('祝福已送上，感谢！');
-    });
-    // ---- 工具函数 ----
-    function showToast(text) {
-      const toast = document.getElementById('toast');
-      toast.textContent = text;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2400);
-    }
-    function escapeHtml(str) {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
-    }
-    // ---- 页码指示器联动 ----
-    const pages = ['page-welcome', 'page-time', 'page-blessing'];
-    const dots = document.querySelectorAll('.page-dots .dot');
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const idx = pages.indexOf(entry.target.id);
-          dots.forEach((d, i) => d.classList.toggle('active', i === idx));
-        }
-      });
-    }, { threshold: 0.5 });
-    pages.forEach(id => observer.observe(document.getElementById(id)));
-    // ---- 初始化 ----
-    renderGallery();
+<script>
+/* ========== Supabase配置区，填入你自己的信息 ========== */
+const SUPABASE_URL = "替换成你的Project URL";
+const SUPABASE_ANON_KEY = "替换成你的anon public key";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const WELCOME_IMAGES = [
+  "https://cdn.jsdelivr.net/gh/yukicamellia/welcome-feast@main/door.jpg",
+  "https://cdn.jsdelivr.net/gh/yukicamellia/welcome-feast@main/sakura.jpg",
+  "https://cdn.jsdelivr.net/gh/yukicamellia/welcome-feast@main/students.jpg"
+];
+
+const TIME_OPTIONS = [
+  { day: '9月13日 周日', detail: '11:30 - 14:00' },
+  { day: '9月13日 周日', detail: '18:00 - 20:30' },
+  { day: '9月25日 周五（中秋）', detail: '11:30 - 14:00' },
+  { day: '9月25日 周五（中秋）', detail: '18:00 - 20:30' },
+  { day: '9月26日 周六', detail: '11:30 - 14:00' },
+  { day: '9月26日 周六', detail: '18:00 - 20:30' },
+  { day: '9月27日 周日', detail: '11:30 - 14:00' },
+  { day: '9月27日 周日', detail: '18:00 - 20:30' },
+  { day: '10月1日（国庆） 周四', detail: '11:30 - 14:00' },
+  { day: '10月1日（国庆）周四', detail: '18:00 - 20:30' },
+  { day: '10月7日 周三（国庆结束）', detail: '11:30 - 14:00' },
+  { day: '10月7日 周三（国庆结束）', detail: '18:00 - 20:30' },
+];
+
+let selectedTimes = [];
+const BLESSING_EMOJIS = ['≽^⚈⩊⚈^≼','૮๑′0`๑ა','◤•͈ᴥ•͈◥ ୭','˚₊⳻ ̫⳺੭˚','^⎚‸⎚^','՞˶•⩊•˶՞ಣ','(ᗜ ˰ ᗜ) ​','۶•͈⚇•͈♡','ε(´｡•᎑•`)っ♡','₊⁺♡‌₊⁺'];
+
+function renderGallery() {
+  const gallery = document.getElementById('gallery');
+  if (WELCOME_IMAGES.length > 0) {
+    gallery.innerHTML = WELCOME_IMAGES.map(src =>
+      `<div class="gallery-item"><img src="${src}" alt="照片" onerror="this.parentElement.classList.add('placeholder');this.style.display='none';this.parentElement.textContent='🌸';"></div>`
+    ).join('');
+  }
+}
+
+function renderTimeOptions() {
+  const container = document.getElementById('timeOptions');
+  container.innerHTML = TIME_OPTIONS.map((opt, i) => {
+    const isSel = selectedTimes.includes(i);
+    return `
+      <div class="time-card ${isSel?'selected':''}" data-index="${i}" onclick="toggleTime(${i})">
+        <div class="radio"></div>
+        <div class="info">
+          <div class="day">${opt.day}</div>
+          <div class="detail">${opt.detail}</div>
+        </div>
+        <div class="votes">--</div>
+      </div>`;
+  }).join('');
+  document.getElementById('submitTimeBtn').disabled = selectedTimes.length === 0;
+}
+
+function toggleTime(index) {
+  const pos = selectedTimes.indexOf(index);
+  if(pos >= 0){
+    selectedTimes.splice(pos,1);
+  }else{
+    selectedTimes.push(index);
+  }
+  renderTimeOptions();
+}
+
+// 提交时间段报名写入云端
+document.getElementById('submitTimeBtn').addEventListener('click', async () => {
+  if (selectedTimes.length === 0) return;
+  const userName = prompt("请输入你的姓名/昵称：");
+  if(!userName || userName.trim() === ""){
+    showToast("请填写昵称");
+    return;
+  }
+  const selectTextArr = selectedTimes.map(idx=>{
+    const o = TIME_OPTIONS[idx];
+    return `${o.day} ${o.detail}`;
+  });
+
+  const {error} = await supabase.from("dinner_signups").insert([{
+    nickname: userName.trim(),
+    selected_times: selectTextArr
+  }]);
+
+  if(error){
+    showToast("提交失败："+error.message);
+  }else{
+    showToast("✅报名已提交云端！");
+    selectedTimes = [];
     renderTimeOptions();
-    renderBlessings();
-  </script>
+  }
+});
+
+// 提交祝福写入云端
+document.getElementById('submitBlessingBtn').addEventListener('click', async () => {
+  const name = document.getElementById('blessingName').value.trim();
+  const msg = document.getElementById('blessingMsg').value.trim();
+  if (!name) { showToast('请先填写你的名字'); return; }
+  if (!msg) { showToast('请写下你的祝福'); return; }
+
+  const {error} = await supabase.from('blessings').insert([{
+    nickname: name,
+    content: msg
+  }]);
+
+  if(error){
+    showToast("祝福提交失败："+error.message);
+  }else{
+    showToast('✅祝福已送上！');
+    document.getElementById('blessingName').value = '';
+    document.getElementById('blessingMsg').value = '';
+    await loadAllBlessings();
+  }
+});
+
+// 从云端加载全部祝福
+async function loadAllBlessings() {
+  const wall = document.getElementById('blessingWall');
+  const {data, error} = await supabase
+    .from('blessings')
+    .select('*')
+    .order('created_at', {ascending: false});
+
+  document.getElementById('blessingCount').textContent = data ? data.length : 0;
+
+  if(error || !data || data.length ===0){
+    wall.innerHTML = '<div class="empty-hint">还没有祝福，快来第一个留言吧～</div>';
+    return;
+  }
+  wall.innerHTML = data.map((b, i) => {
+    const colorClass = 'c' + ((i % 6) + 1);
+    const emoji = BLESSING_EMOJIS[i % BLESSING_EMOJIS.length];
+    const timeStr = new Date(b.created_at).toLocaleString('zh‑CN',{month:'2‑digit',day:'2‑digit',hour:'2‑digit',minute:'2‑digit'});
+    return `
+      <div class="blessing-card ${colorClass}">
+        <div class="card-header">
+          <div class="avatar">${escapeHtml(b.nickname.charAt(0).toUpperCase())}</div>
+          <div class="name">${escapeHtml(b.nickname)}</div>
+        </div>
+        <div class="msg">${escapeHtml(b.content)}</div>
+        <div class="time">${timeStr}</div>
+        <div class="deco-emoji">${emoji}</div>
+      </div>`;
+  }).join('');
+}
+
+function showToast(text) {
+  const toast = document.getElementById('toast');
+  toast.textContent = text;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2400);
+}
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+const pages = ['page-welcome', 'page-time', 'page-blessing'];
+const dots = document.querySelectorAll('.page-dots .dot');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const idx = pages.indexOf(entry.target.id);
+      dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+    }
+  });
+}, { threshold: 0.5 });
+pages.forEach(id => observer.observe(document.getElementById(id)));
+
+(async function init(){
+  renderGallery();
+  renderTimeOptions();
+  await loadAllBlessings();
+})();
+</script>
 </body>
 </html>
