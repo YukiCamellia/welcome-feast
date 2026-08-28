@@ -422,14 +422,15 @@
 /* ========== Supabase配置区，填入你自己的信息 ========== */
 const SUPABASE_URL = "https://hiqnhmizasffzgfhpspd.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_FWVCooHb_ZYUviDtoTn6lg_zguUAsqM";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// 修复冲突：全局已经存在supabase对象，取出createClient，实例命名为sbClient，不再占用supabase变量名
+const { createClient } = supabase;
+const sbClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const WELCOME_IMAGES = [
   "https://cdn.jsdelivr.net/gh/yukicamellia/welcome-feast@main/door.jpg",
   "https://cdn.jsdelivr.net/gh/yukicamellia/welcome-feast@main/sakura.jpg",
   "https://cdn.jsdelivr.net/gh/yukicamellia/welcome-feast@main/students.jpg"
 ];
-
 const TIME_OPTIONS = [
   { day: '9月13日 周日', detail: '11:30 - 14:00' },
   { day: '9月13日 周日', detail: '18:00 - 20:30' },
@@ -444,7 +445,6 @@ const TIME_OPTIONS = [
   { day: '10月7日 周三（国庆结束）', detail: '11:30 - 14:00' },
   { day: '10月7日 周三（国庆结束）', detail: '18:00 - 20:30' },
 ];
-
 let selectedTimes = [];
 const BLESSING_EMOJIS = ['≽^⚈⩊⚈^≼','૮๑′0`๑ა','◤•͈ᴥ•͈◥ ୭','˚₊⳻ ̫⳺੭˚','^⎚‸⎚^','՞˶•⩊•˶՞ಣ','(ᗜ ˰ ᗜ) ​','۶•͈⚇•͈♡','ε(´｡•᎑•`)っ♡','₊⁺♡‌₊⁺'];
 
@@ -484,7 +484,7 @@ function toggleTime(index) {
   renderTimeOptions();
 }
 
-// 提交时间段报名写入云端
+// 提交时间段报名写入云端，全部替换为sbClient
 document.getElementById('submitTimeBtn').addEventListener('click', async () => {
   if (selectedTimes.length === 0) return;
   const userName = prompt("请输入你的姓名/昵称：");
@@ -496,12 +496,10 @@ document.getElementById('submitTimeBtn').addEventListener('click', async () => {
     const o = TIME_OPTIONS[idx];
     return `${o.day} ${o.detail}`;
   });
-
-  const {error} = await supabase.from("dinner_signups").insert([{
+  const {error} = await sbClient.from("dinner_signups").insert([{
     nickname: userName.trim(),
     selected_times: selectTextArr
   }]);
-
   if(error){
     showToast("提交失败："+error.message);
   }else{
@@ -518,7 +516,7 @@ document.getElementById('submitBlessingBtn').addEventListener('click', async () 
   if (!name) { showToast('请先填写你的名字'); return; }
   if (!msg) { showToast('请写下你的祝福'); return; }
 
-  const {error} = await supabase.from('blessings').insert([{
+  const {error} = await sbClient.from('blessings').insert([{
     nickname: name,
     content: msg
   }]);
@@ -536,7 +534,7 @@ document.getElementById('submitBlessingBtn').addEventListener('click', async () 
 // 从云端加载全部祝福
 async function loadAllBlessings() {
   const wall = document.getElementById('blessingWall');
-  const {data, error} = await supabase
+  const {data, error} = await sbClient
     .from('blessings')
     .select('*')
     .order('created_at', {ascending: false});
@@ -570,6 +568,7 @@ function showToast(text) {
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 2400);
 }
+
 function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
