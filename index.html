@@ -385,7 +385,7 @@
     <div class="deco-circle deco-3"></div>
     <div class="section-header">
       <h2>留下你的留言</h2>
-      <p>写下对大学生活的期待与心里话或对新生的祝愿~</p>
+      <p>写下对大学生活的期待与心里话或对新生的祝愿</p>
     </div>
     <div class="msg-count-bar">
       共 <strong id="msgTotalCount">0</strong> 条同学留言
@@ -573,12 +573,21 @@ let blessingPool = [];
 let playIndex = 0;
 const fallContainer = document.getElementById("fallingContainer");
 
-// 启动飘落：按顺序播放，播完循环回到第一条
+// 启动飘落：滑入页面立刻弹出第一张，之后间隔播放
 async function runBlessingFallShow(){
   blessingPool = await fetchAllBlessingData();
   playIndex = 0;
   if(blessingPool.length ===0) return;
   if(fallTimer) clearInterval(fallTimer);
+
+  // 立刻生成第一张卡片，不用等待定时器间隔
+  if(fallContainer.querySelectorAll(".falling-card").length <6){
+    const item = blessingPool[playIndex];
+    createFallingCard(item);
+    playIndex++;
+    if(playIndex >= blessingPool.length) playIndex = 0;
+  }
+
   fallTimer = setInterval(()=>{
     if(fallContainer.querySelectorAll(".falling-card").length >=6) return;
     const item = blessingPool[playIndex];
@@ -595,10 +604,8 @@ function createFallingCard(b){
   const randomEmoji = BLESSING_EMOJIS[Math.floor(Math.random() * BLESSING_EMOJIS.length)];
   const div = document.createElement("div");
   div.className = `falling-card ${colorClass}`;
-  //横向随机位置
   const maxLeft = window.innerWidth - 240;
   const randomLeft = Math.random()*maxLeft;
-  //纵向起始偏移：-350 ~ -120 随机，不会全部挤在最顶端
   const randomStartY = - (350 + Math.random() * 230);
   div.style.left = `${randomLeft}px`;
   div.style.setProperty('--startY', `${randomStartY}px`);
@@ -638,7 +645,6 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-//4个页面监听
 const pages = ['page-welcome', 'page-time', 'page-blessing','page-show-blessing'];
 const dots = document.querySelectorAll('.page-dots .dot');
 const observer = new IntersectionObserver((entries) => {
