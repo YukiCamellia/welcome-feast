@@ -295,6 +295,13 @@
     .falling-card .time{
       font-size:0.65rem;opacity:0.6;margin-top:6px;text-align:right;
     }
+    .falling-card .deco-emoji {
+      position: absolute;
+      bottom: 8px;
+      right: 10px;
+      font-size: 1.4rem;
+      opacity: 0.35;
+    }
 
     /* ========== 通用动画 ========== */
     @keyframes fadeInUp {
@@ -372,13 +379,13 @@
     <button class="submit-btn" id="submitTimeBtn" disabled>确认选择</button>
   </section>
 
-  <!-- ============第三页：留言填写页【新增留言总数显示】 ============ -->
+  <!-- ============第三页：留言填写页 ============ -->
   <section class="page" id="page-blessing">
     <div class="deco-circle deco-1"></div>
     <div class="deco-circle deco-3"></div>
     <div class="section-header">
       <h2>留下你的留言</h2>
-      <p>写下对大学生活的期待与心里话或对新生的祝愿</p>
+      <p>写下对大学生活的期待与心里话或对新生的祝愿~</p>
     </div>
     <div class="msg-count-bar">
       共 <strong id="msgTotalCount">0</strong> 条同学留言
@@ -432,6 +439,13 @@ const TIME_OPTIONS = [
   { day: '10月7日 周三（国庆结束）', detail: '18:00 - 20:30' },
 ];
 let selectedTimes = [];
+
+const BLESSING_EMOJIS = ['🌟','🎉','✨','🌸','🎈','💫','🌻','🍀','🎊','🌈'];
+function getAvatarChar(name) {
+  const trimmed = name.trim();
+  if (!trimmed) return '匿';
+  return trimmed.charAt(0).toUpperCase();
+}
 
 // 更新第三页留言总数
 async function refreshMsgCount(){
@@ -542,7 +556,7 @@ document.getElementById('submitBlessingBtn').addEventListener('click', async () 
     showToast('✅留言已提交！下滑进入留言展示墙查看');
     document.getElementById('blessingName').value = '';
     document.getElementById('blessingMsg').value = '';
-    await refreshMsgCount(); //提交后更新总数
+    await refreshMsgCount();
   }
 });
 
@@ -559,7 +573,7 @@ let blessingPool = [];
 let playIndex = 0;
 const fallContainer = document.getElementById("fallingContainer");
 
-// 启动飘落动画循环
+// 启动飘落：按顺序播放，播完循环回到第一条
 async function runBlessingFallShow(){
   blessingPool = await fetchAllBlessingData();
   playIndex = 0;
@@ -574,25 +588,29 @@ async function runBlessingFallShow(){
   },2200);
 }
 
-// 生成单张下落卡片DOM，纵向起始随机
+// 生成单张下落卡片：随机纵向起始位置 + 随机emoji +头像处理函数
 function createFallingCard(b){
   const colorClass = 'c' + ((Math.random()*6)|0 +1);
   const timeStr = new Date(b.created_at).toLocaleString();
+  const randomEmoji = BLESSING_EMOJIS[Math.floor(Math.random() * BLESSING_EMOJIS.length)];
   const div = document.createElement("div");
   div.className = `falling-card ${colorClass}`;
+  //横向随机位置
   const maxLeft = window.innerWidth - 240;
   const randomLeft = Math.random()*maxLeft;
+  //纵向起始偏移：-350 ~ -120 随机，不会全部挤在最顶端
   const randomStartY = - (350 + Math.random() * 230);
   div.style.left = `${randomLeft}px`;
   div.style.setProperty('--startY', `${randomStartY}px`);
   div.style.animation = "fallDown 7.2s linear forwards";
   div.innerHTML = `
       <div class="card-header">
-        <div class="avatar">${escapeHtml(b.nickname.charAt(0).toUpperCase())}</div>
+        <div class="avatar">${escapeHtml(getAvatarChar(b.nickname))}</div>
         <div class="name">${escapeHtml(b.nickname)}</div>
       </div>
       <div class="msg">${escapeHtml(b.content)}</div>
       <div class="time">${timeStr}</div>
+      <div class="deco-emoji">${randomEmoji}</div>
   `;
   fallContainer.appendChild(div);
   setTimeout(()=>{div.remove();},7200);
@@ -620,6 +638,7 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+//4个页面监听
 const pages = ['page-welcome', 'page-time', 'page-blessing','page-show-blessing'];
 const dots = document.querySelectorAll('.page-dots .dot');
 const observer = new IntersectionObserver((entries) => {
@@ -642,7 +661,7 @@ pages.forEach(id => observer.observe(document.getElementById(id)));
   renderGallery();
   renderTimeOptions();
   await loadTimeVoteCount();
-  await refreshMsgCount(); //页面初始化读取留言总数量
+  await refreshMsgCount();
 })();
 </script>
 </body>
