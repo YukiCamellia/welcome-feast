@@ -209,7 +209,7 @@
       transition: transform 0.4s ease; z-index: 100;
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
-    /* ========== 第三页：祝福墙 ========== */
+    /* ========== 第三页：留言填写页（仅表单） ========== */
     #page-blessing {
       background: linear-gradient(170deg, #42275a 0%, #734b6d 50%, #2c3e50 100%);
     }
@@ -234,98 +234,72 @@
       outline: none; border-color: #ffd700; background: rgba(255,255,255,0.12);
     }
     .blessing-form textarea { min-height: 80px; resize: vertical; }
-    /* 祝福统计条 */
-    .blessing-stats {
-      max-width: 460px; width: 100%;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 18px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 30px;
-      margin-top: 18px; margin-bottom: 14px;
+    .msg-count-bar{
+      max-width:460px;
+      width:100%;
+      padding:10px 18px;
+      background:rgba(255,255,255,0.08);
+      border-radius:30px;
       backdrop-filter: blur(8px);
-      font-size: 0.85rem;
+      text-align:center;
+      font-size:0.9rem;
+      margin-bottom:14px;
     }
-    .blessing-stats .count { color: #ffd700; font-weight: 700; font-size: 1rem; }
-    .blessing-stats .count span { font-size: 1.4rem; margin-right: 4px; }
-    /* 瀑布流祝福墙 */
-    .blessing-wall {
-      max-width: 460px; width: 100%;
-      columns: 2; column-gap: 12px;
-      max-height: 320px; overflow-y: auto; padding: 4px 6px 4px 0;
+    .msg-count-bar strong{
+      color:#ffd700;
+      font-size:1.1rem;
     }
-    .blessing-wall::-webkit-scrollbar { width: 4px; }
-    .blessing-wall::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
-    /* 彩色祝福卡片 */
-    .blessing-card {
-      break-inside: avoid;
-      margin-bottom: 12px;
-      padding: 16px 14px 14px;
-      border-radius: 18px;
-      position: relative;
-      box-shadow: 0 6px 24px rgba(0,0,0,0.18);
-      animation: cardPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      overflow: hidden;
+
+    /* ==========第四页：动态飘落留言展示墙 ========== */
+    #page-show-blessing{
+      background: linear-gradient(170deg, #2c3e50 0%, #42275a 50%, #734b6d 100%);
     }
-    .blessing-card:hover {
-      transform: translateY(-3px) rotate(-1deg);
-      box-shadow: 0 10px 32px rgba(0,0,0,0.28);
+    .falling-card{
+      position:absolute;
+      width:220px;
+      padding:16px 14px 14px;
+      border-radius:18px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.22);
+      overflow:hidden;
+      z-index:2;
     }
-    .blessing-card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-      background: rgba(255,255,255,0.4);
+    /* 卡片下落动画，起始Y位置由JS动态设置 */
+    @keyframes fallDown{
+      0%{ transform: translateY(var(--startY)) rotate(-6deg); opacity:0; }
+      12%{ opacity:1; }
+      85%{ opacity:1; }
+      100%{ transform: translateY(110vh) rotate(6deg); opacity:0; }
     }
-    /* 6 种随机渐变配色 */
-    .blessing-card.c1 { background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%); color: #5d3a3a; }
-    .blessing-card.c2 { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); color: #2c4865; }
-    .blessing-card.c3 { background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%); color: #4a3a5d; }
-    .blessing-card.c4 { background: linear-gradient(135deg, #fdcbf1 0%, #e6dee9 100%); color: #5d3a5d; }
-    .blessing-card.c5 { background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%); color: #2c4a5d; }
-    .blessing-card.c6 { background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%); color: #2c5d3a; }
-    .blessing-card .card-header {
+    .falling-card.c1 { background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%); color: #5d3a3a; }
+    .falling-card.c2 { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); color: #2c4865; }
+    .falling-card.c3 { background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%); color: #4a3a5d; }
+    .falling-card.c4 { background: linear-gradient(135deg, #fdcbf1 0%, #e6dee9 100%); color: #5d3a5d; }
+    .falling-card.c5 { background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%); color: #2c4a5d; }
+    .falling-card.c6 { background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%); color: #2c5d3a; }
+    .falling-card .card-header {
       display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
     }
-    .blessing-card .avatar {
-      width: 36px; height: 36px; border-radius: 50%;
+    .falling-card .avatar {
+      width: 34px; height: 34px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       background: rgba(255,255,255,0.55);
-      font-weight: 700; font-size: 1rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      font-weight: 700; font-size: 0.95rem;
       flex-shrink: 0;
     }
-    .blessing-card .name {
-      font-weight: 700; font-size: 0.95rem; line-height: 1.2;
-      flex: 1; min-width: 0;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    .falling-card .name {
+      font-weight:700; font-size:0.9rem; overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
     }
-    .blessing-card .msg {
-      font-size: 0.9rem; line-height: 1.65;
-      word-break: break-word;
+    .falling-card .msg {
+      font-size:0.85rem; line-height:1.5; word-break:break-word;
     }
-    .blessing-card .time {
-      font-size: 0.7rem; opacity: 0.6; margin-top: 8px; text-align: right;
+    .falling-card .time{
+      font-size:0.65rem;opacity:0.6;margin-top:6px;text-align:right;
     }
-    .blessing-card .deco-emoji {
-      position: absolute; bottom: 8px; right: 10px;
-      font-size: 1.4rem; opacity: 0.35;
-    }
-    @keyframes cardPop {
-      0% { opacity: 0; transform: scale(0.6) translateY(20px) rotate(-8deg); }
-      60% { transform: scale(1.05) translateY(-4px) rotate(2deg); }
-      100% { opacity: 1; transform: scale(1) translateY(0) rotate(0); }
-    }
-    .empty-hint {
-      text-align: center; opacity: 0.5; font-size: 0.9rem; padding: 30px 20px;
-      grid-column: 1 / -1;
-    }
+
     /* ========== 通用动画 ========== */
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(30px); }
       to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes glowPulse {
-      0%, 100% { box-shadow: 0 6px 24px rgba(0,0,0,0.18); }
-      50% { box-shadow: 0 0 32px rgba(255,215,0,0.85), 0 6px 24px rgba(0,0,0,0.18); }
     }
     /* 背景装饰 */
     .deco-circle {
@@ -336,7 +310,7 @@
     .deco-1 { width: 300px; height: 300px; top: -100px; left: -80px; }
     .deco-2 { width: 200px; height: 200px; bottom: -60px; right: -40px; }
     .deco-3 { width: 150px; height: 150px; top: 20%; right: 10%; background: rgba(255,215,0,0.05); }
-    /* 页码指示器 */
+    /* 页码指示器 增加第4个点*/
     .page-dots {
       position: fixed; right: 14px; top: 50%; transform: translateY(-50%);
       display: flex; flex-direction: column; gap: 10px; z-index: 50;
@@ -347,19 +321,21 @@
     }
     .page-dots .dot.active { background: #ffd700; height: 24px; border-radius: 4px; }
     @media (max-width: 400px) {
-      .gallery-item { width: 100px; height: 100px; }
+      .falling-card{width:180px;}
     }
   </style>
 </head>
 <body>
-  <!-- 页码指示器 -->
+  <!-- 页码指示器 4个点 -->
   <div class="page-dots">
     <div class="dot active" onclick="document.getElementById('page-welcome').scrollIntoView()"></div>
     <div class="dot" onclick="document.getElementById('page-time').scrollIntoView()"></div>
     <div class="dot" onclick="document.getElementById('page-blessing').scrollIntoView()"></div>
+    <div class="dot" onclick="document.getElementById('page-show-blessing').scrollIntoView()"></div>
   </div>
   <!-- 提示弹窗 -->
   <div class="toast" id="toast"></div>
+
   <!-- ============ 第一页：欢迎页 ============ -->
   <section class="page" id="page-welcome">
     <div class="deco-circle deco-1"></div>
@@ -369,9 +345,7 @@
       <h1 class="welcome-title">迎新聚餐</h1>
       <p class="welcome-subtitle">致 2026 级新同学</p>
       <div class="welcome-date">期待与你相聚</div>
-      <!-- 新增就餐地点 -->
       <div class="welcome-place">📍就餐地点：佬肥猫（交大闵行校区旁）</div>
-      <!-- !!!这里清空，图片全部由JS renderGallery生成，不再写死img标签，只维护JS一处!!! -->
       <div class="gallery" id="gallery"></div>
       <p style="opacity:0.75; font-size:0.85rem; line-height:1.8;">
         亲爱的学弟学妹，<br />欢迎加入上海交大的大家庭！<br />让我们在聚餐中相识相知，共启新程
@@ -382,6 +356,7 @@
       <div class="arrow">↓</div>
     </div>
   </section>
+
   <!-- ============ 第二页：时间选择 ============ -->
   <section class="page" id="page-time">
     <div class="deco-circle deco-1"></div>
@@ -392,32 +367,44 @@
     </div>
     <div class="time-options-wrap">
       <div class="time-options" id="timeOptions">
-        <!-- 时间选项由 JS 动态生成 -->
       </div>
     </div>
     <button class="submit-btn" id="submitTimeBtn" disabled>确认选择</button>
   </section>
-  <!-- ============ 第三页：祝福墙 ============ -->
+
+  <!-- ============第三页：留言填写页【新增留言总数显示】 ============ -->
   <section class="page" id="page-blessing">
     <div class="deco-circle deco-1"></div>
     <div class="deco-circle deco-3"></div>
     <div class="section-header">
-      <h2>留下你的祝福</h2>
-      <p>写下对大学生活的期待与祝福，一起开启新旅程</p>
+      <h2>留下你的留言</h2>
+      <p>写下对大学生活的期待与心里话或对新生的祝愿</p>
+    </div>
+    <div class="msg-count-bar">
+      共 <strong id="msgTotalCount">0</strong> 条同学留言
     </div>
     <div class="blessing-form">
       <input type="text" id="blessingName" placeholder="你的名字 / 昵称" maxlength="20" />
-      <textarea id="blessingMsg" placeholder="写下你的祝福..." maxlength="200"></textarea>
-      <button class="submit-btn" id="submitBlessingBtn" style="align-self:center;">送上祝福</button>
+      <textarea id="blessingMsg" placeholder="写下你的留言..." maxlength="200"></textarea>
+      <button class="submit-btn" id="submitBlessingBtn" style="align-self:center;">提交留言</button>
     </div>
-    <div class="blessing-stats">
-      <div class="count"><span id="blessingCount">0</span> 条祝福</div>
-      <div style="opacity:0.7;">下滑查看全部 ↓</div>
-    </div>
-    <div class="blessing-wall" id="blessingWall">
-      <div class="empty-hint">还没有祝福，快来第一个留言吧～ </div>
+    <div class="scroll-hint">
+      <span>下滑进入留言展示墙</span>
+      <div class="arrow">↓</div>
     </div>
   </section>
+
+  <!-- ============第四页：留言飘落展示墙 ============ -->
+  <section class="page" id="page-show-blessing">
+    <div class="deco-circle deco-1"></div>
+    <div class="deco-circle deco-2"></div>
+    <div class="section-header" style="z-index:3">
+      <h2>✨ 留言飘落墙</h2>
+      <p>来自同学们的心里话缓缓落下</p>
+    </div>
+    <div id="fallingContainer" style="position:absolute;inset:0;overflow:hidden;"></div>
+  </section>
+
 <script>
 /* ========== Supabase配置区 ========== */
 const SUPABASE_URL = "https://hiqnhmizasffzgfhpspd.supabase.co";
@@ -445,9 +432,16 @@ const TIME_OPTIONS = [
   { day: '10月7日 周三（国庆结束）', detail: '18:00 - 20:30' },
 ];
 let selectedTimes = [];
-const BLESSING_EMOJIS = ['≽^⚈⩊⚈^≼','૮๑′0`๑ა','◤•͈ᴥ•͈◥ ୭','˚₊⳻ ̫⳺੭˚','^⎚‸⎚^','՞˶•⩊•˶՞ಣ','(ᗜ ˰ ᗜ) ​','۶•͈⚇•͈♡','ε(´｡•᎑•`)っ♡','₊⁺♡‌₊⁺'];
 
-// 【新增】统计每个时间段报名人数
+// 更新第三页留言总数
+async function refreshMsgCount(){
+  const {count,error}=await sbClient.from("blessings").select('*',{count:'exact',head:true});
+  if(!error){
+    document.getElementById('msgTotalCount').innerText = count;
+  }
+}
+
+// 统计时间段人数
 async function loadTimeVoteCount(){
   const {data,error}=await sbClient.from("dinner_signups").select("selected_times");
   if(error){
@@ -478,7 +472,6 @@ function renderGallery() {
     ).join('');
   }
 }
-
 function renderTimeOptions() {
   const container = document.getElementById('timeOptions');
   container.innerHTML = TIME_OPTIONS.map((opt, i) => {
@@ -495,7 +488,6 @@ function renderTimeOptions() {
   }).join('');
   document.getElementById('submitTimeBtn').disabled = selectedTimes.length === 0;
 }
-
 function toggleTime(index) {
   const pos = selectedTimes.indexOf(index);
   if(pos >= 0){
@@ -529,71 +521,91 @@ document.getElementById('submitTimeBtn').addEventListener('click', async () => {
     showToast("✅报名已提交云端！");
     selectedTimes = [];
     renderTimeOptions();
-    await loadTimeVoteCount(); //提交完刷新人数
+    await loadTimeVoteCount();
   }
 });
 
-// 提交祝福
+// 提交留言，提交成功刷新留言总数
 document.getElementById('submitBlessingBtn').addEventListener('click', async () => {
   const name = document.getElementById('blessingName').value.trim();
   const msg = document.getElementById('blessingMsg').value.trim();
   if (!name) { showToast('请先填写你的名字'); return; }
-  if (!msg) { showToast('请写下你的祝福'); return; }
-
+  if (!msg) { showToast('请写下你的留言'); return; }
   const {error} = await sbClient.from('blessings').insert([{
     nickname: name,
     content: msg
   }]);
-
   if(error){
-    console.error("祝福提交错误",error);
-    showToast("祝福提交失败："+error.message);
+    console.error("留言提交错误",error);
+    showToast("留言提交失败："+error.message);
   }else{
-    showToast('✅祝福已送上！');
+    showToast('✅留言已提交！下滑进入留言展示墙查看');
     document.getElementById('blessingName').value = '';
     document.getElementById('blessingMsg').value = '';
-    await loadAllBlessings();
+    await refreshMsgCount(); //提交后更新总数
   }
 });
 
-// ==========加载祝福 ==========
-async function loadAllBlessings() {
-  console.log("开始拉取祝福数据……");
-  const wall = document.getElementById('blessingWall');
-  const {data, error} = await sbClient
-    .from('blessings')
-    .select('*')
-    .order('created_at', {ascending: false});
+// 获取全部留言，按【最新在前】顺序
+async function fetchAllBlessingData(){
+  const {data,error}=await sbClient.from('blessings').select("*").order('created_at',{ascending:false});
+  if(error) return [];
+  return data || [];
+}
 
-  console.log("拉取结果 data:", data);
-  console.log("拉取结果 error:", error);
+// 飘落墙状态变量
+let fallTimer = null;
+let blessingPool = [];
+let playIndex = 0;
+const fallContainer = document.getElementById("fallingContainer");
 
-  document.getElementById('blessingCount').textContent = data ? data.length : 0;
+// 启动飘落动画循环
+async function runBlessingFallShow(){
+  blessingPool = await fetchAllBlessingData();
+  playIndex = 0;
+  if(blessingPool.length ===0) return;
+  if(fallTimer) clearInterval(fallTimer);
+  fallTimer = setInterval(()=>{
+    if(fallContainer.querySelectorAll(".falling-card").length >=6) return;
+    const item = blessingPool[playIndex];
+    createFallingCard(item);
+    playIndex++;
+    if(playIndex >= blessingPool.length) playIndex = 0;
+  },2200);
+}
 
-  if(error){
-    wall.innerHTML = `<div class="empty-hint">读取祝福失败：${error.message}</div>`;
-    showToast("读取祝福失败:"+error.message);
-    return;
+// 生成单张下落卡片DOM，纵向起始随机
+function createFallingCard(b){
+  const colorClass = 'c' + ((Math.random()*6)|0 +1);
+  const timeStr = new Date(b.created_at).toLocaleString();
+  const div = document.createElement("div");
+  div.className = `falling-card ${colorClass}`;
+  const maxLeft = window.innerWidth - 240;
+  const randomLeft = Math.random()*maxLeft;
+  const randomStartY = - (350 + Math.random() * 230);
+  div.style.left = `${randomLeft}px`;
+  div.style.setProperty('--startY', `${randomStartY}px`);
+  div.style.animation = "fallDown 7.2s linear forwards";
+  div.innerHTML = `
+      <div class="card-header">
+        <div class="avatar">${escapeHtml(b.nickname.charAt(0).toUpperCase())}</div>
+        <div class="name">${escapeHtml(b.nickname)}</div>
+      </div>
+      <div class="msg">${escapeHtml(b.content)}</div>
+      <div class="time">${timeStr}</div>
+  `;
+  fallContainer.appendChild(div);
+  setTimeout(()=>{div.remove();},7200);
+}
+
+// 停止飘落动画
+function stopBlessingFallShow(){
+  if(fallTimer){
+    clearInterval(fallTimer);
+    fallTimer = null;
   }
-  if(!data || data.length ===0){
-    wall.innerHTML = '<div class="empty-hint">还没有祝福，快来第一个留言吧～</div>';
-    return;
-  }
-  wall.innerHTML = data.map((b, i) => {
-    const colorClass = 'c' + ((i % 6) + 1);
-    const emoji = BLESSING_EMOJIS[i % BLESSING_EMOJIS.length];
-    const timeStr = new Date(b.created_at).toLocaleString();
-    return `
-      <div class="blessing-card ${colorClass}">
-        <div class="card-header">
-          <div class="avatar">${escapeHtml(b.nickname.charAt(0).toUpperCase())}</div>
-          <div class="name">${escapeHtml(b.nickname)}</div>
-        </div>
-        <div class="msg">${escapeHtml(b.content)}</div>
-        <div class="time">${timeStr}</div>
-        <div class="deco-emoji">${emoji}</div>
-      </div>`;
-  }).join('');
+  fallContainer.innerHTML = "";
+  playIndex = 0;
 }
 
 function showToast(text) {
@@ -608,24 +620,29 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-const pages = ['page-welcome', 'page-time', 'page-blessing'];
+const pages = ['page-welcome', 'page-time', 'page-blessing','page-show-blessing'];
 const dots = document.querySelectorAll('.page-dots .dot');
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       const idx = pages.indexOf(entry.target.id);
       dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      if(idx === 3){
+        runBlessingFallShow();
+      }else{
+        stopBlessingFallShow();
+      }
     }
   });
-}, { threshold: 0.5 });
+}, { threshold: 0.4 });
+
 pages.forEach(id => observer.observe(document.getElementById(id)));
 
-// 页面打开加载
 (async function init(){
   renderGallery();
   renderTimeOptions();
-  await loadTimeVoteCount(); //页面加载读取时段人数
-  await loadAllBlessings();
+  await loadTimeVoteCount();
+  await refreshMsgCount(); //页面初始化读取留言总数量
 })();
 </script>
 </body>
